@@ -2,55 +2,111 @@
 
 # reCamera VideoStream Processor 🎥
 
-## Powered by Seeedstudio's reCamera
+## Powered by Seeedstudio's reCamera 
 
-The reCamera is a groundbreaking open-source AI camera platform by Seeedstudio that's revolutionizing computer vision. With 1 TOPS AI performance and 5MP@30FPS video encoding, it's a powerhouse in a tiny package.
+The reCamera is a groundbreaking open-source AI camera platform by Seeedstudio that's revolutionizing computer vision. 
+With 1 TOPS AI performance and 5MP@30FPS video encoding, it's a powerhouse in a tiny package.
 
 ### ⚡ Key Features of reCamera
 
-- 🧠 1 TOPS@Int8 AI Performance
+- 🧠 1 TOPS@Int8 AI Performance 
 - 📸 5MP @ 30FPS Video Encoding
 - 💻 RISC-V SoC Architecture
-- 🛠️ Fully Customizable & Programmable
+- 🛠️ Fully Customizable & Programmable 
 - 📱 YOLO11 Native Support
 - 🔌 Expandable Interfaces
-
-<video width="100%" controls>
-  <source src="https://media-cdn.seeedstudio.com/media/catalog/product/1/-/1-102991896-recamera_2.mp4" type="video/mp4">
-</video>
+- 🌐 WiFi & Bluetooth Connectivity
+- 💾 Up to 64GB Storage
 
 [Learn more about reCamera](https://www.seeedstudio.com/recamera)
 
-## 🚀 About This Project
+## 📚 Documentation & Getting Started
 
-This repository contains a Node-RED function node for processing video streams from reCamera to SenseCap. It's designed to make vision AI deployment simple and efficient.
+Check out our comprehensive guide on getting started with Node-RED and reCamera:
+[HeySalad reCamera Documentation](https://heysalad-io.notion.site/How-to-use-Seeedstudio-reCamera-Documentation-for-HeySalad-rs-1482409b5e7280b2b7c8e802a2ccab80)
 
-### 🔑 Key Features
+## 🔄 Node-RED Flow
 
-- 🎯 Real-time video stream processing
-- 🤖 AI model data formatting
-- 📊 SenseCap integration
-- 🔄 Automatic stream management
-- 📝 Comprehensive logging
+![Node-RED Flow](flow-image-url-here)
 
-## 🛠️ How to Use
+The flow consists of three main components:
+1. Model Node (Input) - Receives AI model data
+2. ReCamera SenseCap Video Streamer (Processing)
+3. MQTT Out Node (Output) - Publishes to SenseCap
+
+## 💻 Code Breakdown
+
+### Global Variables
+```
+
+let frameCounter = 0;
+let streamId = Date.now();
+
+```
+
+These variables track the stream state and ensure proper frame sequencing.
+
+# Main Processing Function
+
+```
+function processModelStream(msg) {
+    // This core function:
+    // - Validates incoming model data
+    // - Processes image frames
+    // - Formats data for SenseCap
+    // - Handles error cases
+    // - Generates both data and debug messages
+}
+
+```
+
+# Stream Management
+
+```
+function resetStream() {
+    frameCounter = 0;
+    streamId = Date.now();
+}
+
+```
+Manages stream lifecycle and handles timeouts/resets.
+
+# MQTT Message Structure
+
+```
+
+const mqttMessage = {
+    topic: `sensecap/${modelPayload.username}/model/data`,
+    payload: modelPayload,
+    qos: 1,
+    retain: false
+};
+
+```
+Formatted specifically for SenseCap's requirements.
+
+
+## 🛠️ Setup Instructions
 
 1. Access Node-RED (typically at `192.168.42.1:1880`)
 2. Add a Node function and name it "ReCamera SenseCap Video Streamer"
-3. Insert the provided code in the "On Message" section
-4. Connect nodes: `Model Node -> ReCamera SenseCap Video Streamer -> MQTT Out Node`
+3. Copy the full code into the "On Message" section
+4. Configure MQTT out node with your SenseCap credentials
+5. Deploy and monitor the debug output
 
-## ⚠️ Known Issues
+## ⚠️ Current Challenges
 
-Currently experiencing challenges with SenseCap data transmission. If you have experience with publishing data from reCamera to SenseCap, please contribute!
-
-[View Issue Screenshot](https://github.com/Hey-Salad/reCamera-VideoStream-Processor/blob/2b6ffedf9cbe5625423ec73b3396b9f1ee25ee90/images/Bildschirmfoto%202024-11-29%20um%2006.58.00.png)
+We're working on improving SenseCap integration. Key areas:
+- MQTT connection stability
+- Data format validation
+- Stream synchronization
+- Error handling improvements
 
 ## 📝 License
 
 MIT License - Use as is, no liability to the Author and Partners
 
-## ☕ Support
+## ❤️ Support
 
 If you find this code useful, consider buying us a coffee!
 
@@ -60,7 +116,16 @@ If you find this code useful, consider buying us a coffee!
 
 ## 🤝 Contributing
 
-We welcome contributions! If you have solutions for SenseCap integration or other improvements, please submit a pull request.
+We welcome contributions! Particularly looking for:
+- SenseCap integration improvements
+- Error handling enhancements
+- Documentation updates
+- Performance optimizations
+
+## 📫 Get in Touch
+
+- Website: [heysalad.io](https://heysalad.io)
+- Email: hello@heysalad.io
 
 ---
-Made with 💚 by HeySalad
+Made with ❤️ by HeySalad
