@@ -37,7 +37,7 @@ The flow consists of three main components:
 ## 💻 Code Breakdown
 
 ### Global Variables
-```
+```js
 
 let frameCounter = 0;
 let streamId = Date.now();
@@ -48,7 +48,7 @@ These variables track the stream state and ensure proper frame sequencing.
 
 # Main Processing Function
 
-```
+``` js
 function processModelStream(msg) {
     // This core function:
     // - Validates incoming model data
@@ -62,7 +62,8 @@ function processModelStream(msg) {
 
 # Stream Management
 
-```
+``` js
+
 function resetStream() {
     frameCounter = 0;
     streamId = Date.now();
@@ -73,7 +74,7 @@ Manages stream lifecycle and handles timeouts/resets.
 
 # MQTT Message Structure
 
-```
+``` js
 
 const mqttMessage = {
     topic: `sensecap/${modelPayload.username}/model/data`,
