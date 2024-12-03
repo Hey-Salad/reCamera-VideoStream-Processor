@@ -20,6 +20,46 @@ With 1 TOPS AI performance and 5MP@30FPS video encoding, it's a powerhouse in a 
 
 [Learn more about reCamera](https://www.seeedstudio.com/recamera)
 
+## 📁 Project Files
+
+```bash
+reCamera-processor/
+├── README.md               # Project documentation
+├── server.js              # WebSocket server
+├── streamToWebSocket.js   # WebSocket handler
+├── streamToSenseCap.js    # SenseCap integration
+└── mqtt-streamer.py       # MQTT processor
+```
+
+## 🚀 Local Development
+Environment Setup
+Create a .env file in the project root:
+
+```bash
+PORT=8080
+SUPABASE_URL=your_supabase_url
+SUPABASE_KEY=your_supabase_key
+MQTT_BROKER=localhost
+MQTT_PORT=1883
+
+```
+
+## Quick Start
+
+```bash
+# Install dependencies
+npm install
+pip install -r requirements.txt
+
+# Start servers
+npm run start:server
+python mqtt-streamer.py
+
+# Test connections
+wscat -c ws://localhost:8080/ws
+mosquitto_pub -h localhost -p 1883 -t "device/model/data" -m '{"stream_id":"test"}'
+
+```
 ## 📚 Documentation & Getting Started
 
 Check out our comprehensive guide on getting started with Node-RED and reCamera:
@@ -27,65 +67,141 @@ Check out our comprehensive guide on getting started with Node-RED and reCamera:
 
 ## 🔄 Node-RED Flow
 
-![Node-RED Flow](flow-image-url-here)
+![Node-RED Flow]
 
 The flow consists of three main components:
 1. Model Node (Input) - Receives AI model data
 2. ReCamera SenseCap Video Streamer (Processing)
 3. MQTT Out Node (Output) - Publishes to SenseCap
 
-## 💻 Code Breakdown
+### 🔍 Flow Details
 
-### Global Variables
-```js
+#### 1. Model Node Input Data
+```javascript
+{
+    payload: {
+        code: 0,                     // Status code
+        data: {
+            boxes: [...],            // Bounding box coordinates
+            count: 2,                // Number of detections
+            image: "base64_data",    // Base64 encoded image
+            labels: ["person", ...], // Detection labels
+            perf: [...],             // Performance data
+            resolution: [640, 480]   // Image resolution
+        },
+        name: "YOLO",               // Model name
+        type: "detection"           // Model type
+    }
+}
+```
 
+## 2. Function Node (Video Stream Processor)
+
+``` javascript
+// State tracking
 let frameCounter = 0;
 let streamId = Date.now();
 
-```
-
-These variables track the stream state and ensure proper frame sequencing.
-
-# Main Processing Function
-
-``` js
-function processModelStream(msg) {
-    // This core function:
-    // - Validates incoming model data
-    // - Processes image frames
-    // - Formats data for SenseCap
-    // - Handles error cases
-    // - Generates both data and debug messages
-}
-
-```
-
-# Stream Management
-
-``` js
-
-function resetStream() {
-    frameCounter = 0;
-    streamId = Date.now();
-}
-
-```
-Manages stream lifecycle and handles timeouts/resets.
-
-# MQTT Message Structure
-
-``` js
-
-const mqttMessage = {
-    topic: `sensecap/${modelPayload.username}/model/data`,
-    payload: modelPayload,
-    qos: 1,
-    retain: false
+// Main processing function
+msg.payload = {
+    frameId: frameCounter++,
+    streamId: streamId,
+    timestamp: Date.now(),
+    data: {
+        image: msg.payload.data.image,
+        boxes: msg.payload.data.boxes || [],
+        count: msg.payload.data.count || 0,
+        labels: msg.payload.data.labels || [],
+        performance: msg.payload.data.perf || [],
+        resolution: msg.payload.data.resolution || []
+    }
 };
 
-```
-Formatted specifically for SenseCap's requirements.
+return msg;
 
+```
+
+#### 3. WebSocket Output Data
+```javascript
+{
+    payload: {
+        frameId: 1,                 // Sequential frame number
+        streamId: 1701234567890,    // Unique stream identifier
+        timestamp: 1701234567890,   // Current timestamp
+        data: {
+            image: "base64_data",   // Processed image
+            boxes: [...],           // Detection boxes
+            count: 2,               // Object count
+            labels: [...],          // Detection labels
+            performance: [...],      // Performance metrics
+            resolution: [640, 480]   // Image dimensions
+        }
+    }
+}
+```
+## 🔧 Flow Configuration Tips
+- Performance Optimization
+
+- Monitor frame rates for stability
+- Watch memory usage with large base64 images
+- Consider implementing frame rate limiting
+
+
+- Error Handling
+
+- Validate all input data fields
+- Check image data formatting
+- Handle connection interruptions gracefully
+
+
+- Debugging Guide
+
+- Add debug nodes between components
+- Monitor frame counter for dropped frames
+- Watch for stream ID changes
+- Check connection status
+
+## 📡 WebSocket vs MQTT
+
+### WebSocket
+- **Connection**: Full-duplex, persistent TCP connection
+- **Use Case**: Real-time, bi-directional communication
+- **Best For**: 
+  - Live video streaming
+  - Interactive applications
+  - Browser-based clients
+  - Direct client-server communication
+- **Features**:
+  - Low latency
+  - Browser support
+  - Stateful connection
+  - Raw data streaming
+
+### MQTT
+- **Connection**: Publish-subscribe messaging protocol
+- **Use Case**: IoT device communication, message broadcasting
+- **Best For**:
+  - IoT devices
+  - Multiple subscribers
+  - Limited bandwidth networks
+  - Message queuing
+- **Features**:
+  - Quality of Service levels
+  - Message retention
+  - Last Will and Testament
+  - Topic-based routing
+
+### Why We Use Both
+1. **WebSocket for Video**:
+   - Direct streaming to web clients
+   - Lower latency for real-time viewing
+   - Better handling of large data frames
+
+2. **MQTT for Control**:
+   - Device management
+   - Configuration updates
+   - Status broadcasting
+   - Data persistence
 
 ## 🛠️ Setup Instructions
 
@@ -97,7 +213,7 @@ Formatted specifically for SenseCap's requirements.
 
 ## ⚠️ Current Challenges
 
-We're working on improving SenseCap integration. Key areas:
+We're working on improving integration. Key areas:
 - MQTT connection stability
 - Data format validation
 - Stream synchronization
@@ -118,7 +234,7 @@ If you find this code useful, consider buying us a coffee!
 ## 🤝 Contributing
 
 We welcome contributions! Particularly looking for:
-- SenseCap integration improvements
+- Integration improvements
 - Error handling enhancements
 - Documentation updates
 - Performance optimizations
